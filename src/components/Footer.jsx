@@ -12,38 +12,6 @@ const Footer = () => {
           <p className="text-gray-500 text-sm">
             © {currentYear} All rights reserved.
           </p>
-          <div className="mt-6 flex justify-center gap-6">
-            <a
-              href="#home"
-              className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
-            >
-              Home
-            </a>
-            <a
-              href="#about"
-              className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
-            >
-              About
-            </a>
-            <a
-              href="#experience"
-              className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
-            >
-              Experience
-            </a>
-            <a
-              href="#projects"
-              className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
-            >
-              Projects
-            </a>
-            <a
-              href="#contact"
-              className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
-            >
-              Contact
-            </a>
-          </div>
         </div>
       </div>
     </footer>

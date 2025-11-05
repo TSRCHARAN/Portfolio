@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,13 +18,7 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'About', href: '#about' },
-    { name: 'Experience', href: '#experience' },
-    { name: 'Skills', href: '#skills' },
-    { name: 'Projects', href: '#projects' },
-    { name: 'Achievements', href: '#achievements' },
-    { name: 'Contact', href: '#contact' },
+    { name: 'Home', href: '/', type: 'route' },
   ];
 
   return (
@@ -33,21 +30,39 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <a href="#home" className="text-2xl font-bold text-gradient">
-            Portfolio
-          </a>
+          <Link to="/" className="text-2xl font-bold text-gradient">
+            S.AI
+          </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6">
             {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300 font-medium"
-              >
-                {link.name}
-              </a>
+              link.type === 'route' ? (
+                <Link
+                  key={link.name}
+                  to={link.href}
+                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300 font-medium"
+                >
+                  {link.name}
+                </Link>
+              ) : (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300 font-medium"
+                >
+                  {link.name}
+                </a>
+              )
             ))}
+            
+            {/* Blogs Button */}
+            <Link
+              to="/blogs"
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-md"
+            >
+              📝 Blogs
+            </Link>
             
             {/* Theme Toggle Button */}
             <button
@@ -108,15 +123,35 @@ const Navbar = () => {
         <div className="md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-md">
           <div className="px-2 pt-2 pb-3 space-y-1">
             {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors duration-300"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {link.name}
-              </a>
+              link.type === 'route' ? (
+                <Link
+                  key={link.name}
+                  to={link.href}
+                  className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors duration-300"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              ) : (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors duration-300"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.name}
+                </a>
+              )
             ))}
+            
+            {/* Blogs Link in Mobile */}
+            <Link
+              to="/blogs"
+              className="block px-3 py-2 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-md hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              📝 Blogs
+            </Link>
           </div>
         </div>
       )}
