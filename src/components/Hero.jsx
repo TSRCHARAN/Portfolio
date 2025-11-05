@@ -5,27 +5,40 @@ const Hero = () => {
       className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pt-16 transition-colors duration-300"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center animate-fade-in">
+        <div className="text-center">
           {/* Greeting */}
-          <p className="text-blue-600 dark:text-blue-400 font-semibold text-lg mb-4 animate-slide-down">
-            👋 Hello, I'm
-          </p>
+          <div className="inline-block mb-4 animate-slide-down">
+            <p className="text-blue-600 dark:text-blue-400 font-semibold text-lg px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-full border border-blue-200 dark:border-blue-800">
+              👋 Hello, I'm
+            </p>
+          </div>
 
           {/* Name */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-gray-900 dark:text-white mb-6 animate-fade-in">
             <span className="text-gradient">T Sai Ram Charan</span>
           </h1>
-
+          
           {/* Title */}
-          <p className="text-2xl sm:text-3xl md:text-4xl text-gray-700 dark:text-gray-300 mb-8">
-            Software Development Engineer
-          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
+            <span className="px-4 py-2 text-base sm:text-lg font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+              💻 Full-Stack Developer
+            </span>
+            <span className="px-4 py-2 text-base sm:text-lg font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
+              🤖 AI/ML Enthusiast
+            </span>
+            <span className="px-4 py-2 text-base sm:text-lg font-semibold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+              🚀 Co-Founder @ Z444
+            </span>
+          </div>
 
           {/* Description */}
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed">
-            SDE-1 @ Digital Trust Technologies | M.Tech AI/ML Student @ BITS Pilani (2025-2027)
-            <br />
-            Building secure, scalable systems with .NET, React & Cloud Technologies
+          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed">
+            Passionate <span className="font-semibold text-blue-600 dark:text-blue-400">.NET developer</span> specializing in 
+            <span className="font-semibold text-gray-800 dark:text-gray-200"> enterprise architecture</span>, 
+            <span className="font-semibold text-gray-800 dark:text-gray-200"> microservices</span>, and 
+            <span className="font-semibold text-gray-800 dark:text-gray-200"> cloud solutions</span>. 
+            Advancing my expertise in <span className="font-semibold text-blue-600 dark:text-blue-400">Artificial Intelligence & Machine Learning</span> at 
+            <span className="font-semibold text-gray-800 dark:text-gray-200">BITS Pilani</span> to build intelligent, data-driven systems.
           </p>
 
           {/* CTA Buttons */}

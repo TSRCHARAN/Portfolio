@@ -7,6 +7,9 @@ export default {
   darkMode: 'class', // Enable dark mode with class strategy
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['JetBrains Mono', 'monospace', 'system-ui', '-apple-system', 'sans-serif'],
+      },
       colors: {
         primary: {
           50: '#eff6ff',
