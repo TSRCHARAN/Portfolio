@@ -1,35 +1,28 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
+import { supabase } from '../utils/supabase';
 import { 
-  getCategoryById, 
-  getBlogsByCategory,
-  searchBlogs
+  getCategoryById as getFallbackCategory, 
+  getBlogsByCategory as getFallbackBlogs,
+  searchBlogs as searchFallbackBlogs
 } from '../data/blogsData';
 
 const CategoryBlogs = () => {
   const { categoryId } = useParams();
-  const category = getCategoryById(categoryId);
-  const allBlogsInCategory = getBlogsByCategory(categoryId);
-
+  const [category, setCategory] = useState(null);
+  const [allBlogsInCategory, setAllBlogsInCategory] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef(null);
 
-  // If category not found, redirect to categories page
-  if (!category) {
-    return <Navigate to="/blogs" replace />;
-  }
-
-  // Get tags from this category only
-  const categoryTags = [...new Set(allBlogsInCategory.flatMap(blog => blog.tags))].sort();
-
-  // Handle search
+  // Handle search - MUST be before any returns
   const handleSearch = useCallback((term) => {
     setSearchTerm(term);
     setShowSuggestions(term.trim().length > 0);
   }, []);
 
-  // Close suggestions when clicking outside
+  // Close suggestions when clicking outside - MUST be before any returns
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -41,11 +34,141 @@ const CategoryBlogs = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Load category and blogs from Supabase
+  useEffect(() => {
+    loadCategoryData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoryId]);
+
+  async function loadCategoryData() {
+    setLoading(true);
+    try {
+      console.log('Loading category:', categoryId);
+      
+      // Try to find category by slug first, then by ID
+      let dbCategory = null;
+      
+      // Try slug match first
+      const { data: slugMatch, error: slugError } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('slug', categoryId)
+        .maybeSingle();
+      
+      if (slugMatch) {
+        dbCategory = slugMatch;
+      } else {
+        // Try ID match if slug didn't work
+        const { data: idMatch, error: idError } = await supabase
+          .from('categories')
+          .select('*')
+          .eq('id', categoryId)
+          .maybeSingle();
+        
+        if (idMatch) {
+          dbCategory = idMatch;
+        }
+      }
+
+      if (dbCategory) {
+        console.log('Found category:', dbCategory);
+        setCategory({
+          id: dbCategory.id,
+          name: dbCategory.name,
+          slug: dbCategory.slug,
+          icon: dbCategory.icon || '📝',
+          color: 'from-blue-500 to-purple-600',
+          description: dbCategory.description || ''
+        });
+
+        // Load blogs for this category
+        const { data: dbBlogs, error: blogsError } = await supabase
+          .from('blogs')
+          .select('*')
+          .eq('category_id', dbCategory.id)
+          .eq('status', 'published')
+          .order('created_at', { ascending: false });
+
+        if (blogsError) {
+          console.error('Error loading blogs:', blogsError);
+        }
+
+        console.log('Found blogs:', dbBlogs?.length || 0);
+        
+        // Transform DB blogs to match expected format
+        const transformedBlogs = (dbBlogs || []).map(blog => ({
+          ...blog,
+          tags: blog.tags || [],
+          date: blog.created_at ? new Date(blog.created_at).toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric' 
+          }) : '',
+          readTime: blog.content_md ? `${Math.ceil(blog.content_md.split(' ').length / 200)} min read` : '5 min read',
+          category: blog.category_id
+        }));
+        
+        const fallbackBlogs = getFallbackBlogs(categoryId);
+        setAllBlogsInCategory([...transformedBlogs, ...fallbackBlogs]);
+      } else {
+        console.log('Category not found in DB, trying fallback');
+        // Try fallback categories
+        const fallbackCat = getFallbackCategory(categoryId);
+        if (fallbackCat) {
+          setCategory(fallbackCat);
+          setAllBlogsInCategory(getFallbackBlogs(categoryId));
+        } else {
+          console.log('Category not found in fallback either');
+        }
+      }
+    } catch (err) {
+      console.error('Error loading category:', err);
+      const fallbackCat = getFallbackCategory(categoryId);
+      if (fallbackCat) {
+        setCategory(fallbackCat);
+        setAllBlogsInCategory(getFallbackBlogs(categoryId));
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Search within category blogs
+  const searchInCategory = (term) => {
+    const lowerTerm = term.toLowerCase();
+    return allBlogsInCategory.filter(blog => 
+      blog.title.toLowerCase().includes(lowerTerm) ||
+      blog.excerpt?.toLowerCase().includes(lowerTerm) ||
+      blog.tags?.some(tag => tag.toLowerCase().includes(lowerTerm))
+    );
+  };
+
+  // Get tags from this category only (safe to do before returns, no hooks)
+  const categoryTags = allBlogsInCategory.length > 0 
+    ? [...new Set(allBlogsInCategory.flatMap(blog => blog.tags || []))].sort()
+    : [];
+
   // Get filtered blogs
-  const blogs = searchTerm.trim() ? searchBlogs(searchTerm, allBlogsInCategory) : allBlogsInCategory;
+  const blogs = searchTerm.trim() ? searchInCategory(searchTerm) : allBlogsInCategory;
 
   // Get search results for suggestions
-  const searchResults = searchTerm.trim() ? searchBlogs(searchTerm, allBlogsInCategory) : [];
+  const searchResults = searchTerm.trim() ? searchInCategory(searchTerm) : [];
+
+  // If category not found and not loading, redirect to categories page
+  if (!loading && !category) {
+    return <Navigate to="/blogs" replace />;
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-20 pb-16 bg-white dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4">⏳</div>
+          <p className="text-gray-600 dark:text-gray-400">Loading category...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-20 pb-16 bg-white dark:bg-gray-900 transition-colors duration-300">
@@ -205,21 +328,23 @@ const CategoryBlogs = () => {
                 </p>
 
                 {/* Tags */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {blog.tags.slice(0, 2).map((tag, tagIndex) => (
-                    <span
-                      key={tagIndex}
-                      className="px-3 py-1 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs font-semibold rounded-lg border border-gray-300 dark:border-gray-600"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                  {blog.tags.length > 2 && (
-                    <span className="px-3 py-1 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-xs font-semibold rounded-lg border border-gray-300 dark:border-gray-600">
-                      +{blog.tags.length - 2}
-                    </span>
-                  )}
-                </div>
+                {blog.tags && blog.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {blog.tags.slice(0, 2).map((tag, tagIndex) => (
+                      <span
+                        key={tagIndex}
+                        className="px-3 py-1 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs font-semibold rounded-lg border border-gray-300 dark:border-gray-600"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                    {blog.tags.length > 2 && (
+                      <span className="px-3 py-1 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-xs font-semibold rounded-lg border border-gray-300 dark:border-gray-600">
+                        +{blog.tags.length - 2}
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Footer */}
                 <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 pt-4 border-t border-gray-200 dark:border-gray-600">

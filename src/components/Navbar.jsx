@@ -57,11 +57,17 @@ const Navbar = () => {
             ))}
             
             {/* Blogs Button */}
-            <Link
+            {/* <Link
               to="/blogs"
               className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-md"
             >
               📝 Blogs
+            </Link> */}
+            <Link
+              to="/net-to-ai"
+              className="px-4 py-2 bg-gradient-to-r from-green-600 to-teal-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-teal-700 transform hover:scale-105 transition-all duration-300 shadow-md"
+            >
+              🚀 The Transition
             </Link>
             
             {/* Theme Toggle Button */}
@@ -145,12 +151,19 @@ const Navbar = () => {
             ))}
             
             {/* Blogs Link in Mobile */}
-            <Link
+            {/* <Link
               to="/blogs"
               className="block px-3 py-2 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-md hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               📝 Blogs
+            </Link> */}
+            <Link
+              to="/net-to-ai"
+              className="block px-3 py-2 text-center bg-gradient-to-r from-green-600 to-teal-600 text-white font-semibold rounded-md hover:from-green-700 hover:to-teal-700 transition-all duration-300"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              🚀 The Transition
             </Link>
           </div>
         </div>

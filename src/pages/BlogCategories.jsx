@@ -1,10 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '../utils/supabase';
 import { 
-  blogCategories, 
+  blogCategories as fallbackCategories, 
   getBlogsByCategory, 
-  blogs,
-  searchBlogs,
+  blogs as fallbackBlogs,
+  searchBlogs as searchFallbackBlogs,
   getCategoryById 
 } from '../data/blogsData';
 
@@ -12,6 +13,76 @@ const BlogCategories = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef(null);
+  const [categories, setCategories] = useState([]);
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load categories and blogs from Supabase
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    setLoading(true);
+    try {
+      // Load categories
+      const { data: dbCategories, error: catError } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name');
+
+      // Load published blogs
+      const { data: dbBlogs, error: blogsError } = await supabase
+        .from('blogs')
+        .select('*')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false });
+
+      if (catError) {
+        console.error('Error loading categories:', catError);
+        setCategories(fallbackCategories);
+      } else {
+        // Transform DB categories to match the expected format
+        const transformedCategories = dbCategories.map(cat => ({
+          id: cat.id,
+          name: cat.name,
+          slug: cat.slug,
+          icon: cat.icon || '📝',
+          color: 'from-blue-500 to-purple-600', // Default gradient
+          description: cat.description || ''
+        }));
+        setCategories([...transformedCategories, ...fallbackCategories]);
+      }
+
+      if (blogsError) {
+        console.error('Error loading blogs:', blogsError);
+        setBlogs(fallbackBlogs);
+      } else {
+        setBlogs([...dbBlogs, ...fallbackBlogs]);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      setCategories(fallbackCategories);
+      setBlogs(fallbackBlogs);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Search blogs (from both DB and fallback)
+  const searchBlogs = (term) => {
+    const lowerTerm = term.toLowerCase();
+    return blogs.filter(blog => 
+      blog.title.toLowerCase().includes(lowerTerm) ||
+      blog.excerpt?.toLowerCase().includes(lowerTerm) ||
+      blog.tags?.some(tag => tag.toLowerCase().includes(lowerTerm))
+    );
+  };
+
+  // Get blogs by category
+  const getBlogsByCategoryId = (categoryId) => {
+    return blogs.filter(blog => blog.category_id === categoryId || blog.category === categoryId);
+  };
 
   // Handle search
   const handleSearch = useCallback((term) => {
@@ -33,6 +104,24 @@ const BlogCategories = () => {
 
   // Get search results
   const searchResults = searchTerm.trim() ? searchBlogs(searchTerm) : [];
+
+  // Get category info (check DB categories first, then fallback)
+  const getCategoryInfo = (categoryId) => {
+    const dbCat = categories.find(c => c.id === categoryId);
+    if (dbCat) return dbCat;
+    return getCategoryById(categoryId);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-20 pb-16 bg-white dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4">⏳</div>
+          <p className="text-gray-600 dark:text-gray-400">Loading categories...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-20 pb-16 bg-white dark:bg-gray-900 transition-colors duration-300">
@@ -85,7 +174,7 @@ const BlogCategories = () => {
                 </div>
                 <div className="py-2">
                   {searchResults.map((blog) => {
-                    const category = getCategoryById(blog.category);
+                    const category = getCategoryInfo(blog.category_id || blog.category);
                     return (
                       <Link
                         key={blog.id}
@@ -153,13 +242,13 @@ const BlogCategories = () => {
 
         {/* Categories Grid */}
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {blogCategories.map((category) => {
-            const blogCount = getBlogsByCategory(category.id).length;
+          {categories.map((category) => {
+            const blogCount = getBlogsByCategoryId(category.id).length;
             
             return (
               <Link
                 key={category.id}
-                to={`/blogs/category/${category.id}`}
+                to={`/blogs/category/${category.slug || category.id}`}
                 className="group relative bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-3 border-2 border-gray-200 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 overflow-hidden"
               >
                 {/* Background Gradient Effect */}

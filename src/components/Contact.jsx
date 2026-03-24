@@ -117,7 +117,7 @@ const Contact = () => {
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   <span className="text-2xl">📍</span>
-                  <span className="text-gray-700">Andhra Pradesh, India</span>
+                  <span className="text-gray-700">India</span>
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-2xl">📧</span>

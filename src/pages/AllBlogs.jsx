@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SearchBar from '../components/SearchBar';
 import FilterControls from '../components/FilterControls';
@@ -11,12 +11,46 @@ import {
   sortBlogs,
   getCategoryById 
 } from '../data/blogsData';
+import { fetchPublishedBlogs } from '../utils/supabase';
 
 const AllBlogs = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+  const [supabaseBlogs, setSupabaseBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch Supabase blogs on mount
+  useEffect(() => {
+    async function loadBlogs() {
+      const dbBlogs = await fetchPublishedBlogs();
+      // Transform Supabase blogs to match local blog format
+      const transformed = dbBlogs.map(blog => ({
+        id: blog.id,
+        slug: blog.slug,
+        title: blog.title,
+        excerpt: blog.excerpt || '',
+        content: blog.content_md || '',
+        category: blog.category_id || 'ai', // Use category_id from DB or default to 'ai'
+        date: new Date(blog.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        readTime: `${Math.ceil((blog.content_md || '').split(' ').length / 200)} min read`,
+        tags: [], // Extract from content or add tags table later
+        source: blog.source || 'notion', // Track source
+        author: {
+          name: 'T Sai Ram Charan',
+          role: 'AI Engineer',
+          avatar: '/avatar.jpg'
+        }
+      }));
+      setSupabaseBlogs(transformed);
+      setLoading(false);
+    }
+    loadBlogs();
+  }, []);
+
+  // Merge local and Supabase blogs
+  const allBlogs = [...blogs, ...supabaseBlogs];
 
   const allTags = getAllTags();
 
@@ -36,7 +70,7 @@ const AllBlogs = () => {
 
   // Get filtered and sorted blogs
   const getFilteredBlogs = () => {
-    let filtered = [...blogs];
+    let filtered = [...allBlogs];
 
     // Filter by category
     if (selectedCategory !== 'all') {
@@ -67,7 +101,7 @@ const AllBlogs = () => {
           </h1>
           <div className="w-20 h-1 bg-gradient-to-r from-blue-600 to-purple-600 mx-auto mb-6"></div>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            {filteredBlogs.length} {filteredBlogs.length === 1 ? 'article' : 'articles'} found
+            {loading ? 'Loading...' : `${filteredBlogs.length} ${filteredBlogs.length === 1 ? 'article' : 'articles'} found`}
           </p>
         </div>
 
@@ -118,7 +152,12 @@ const AllBlogs = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredBlogs.map((blog) => {
-              const category = getCategoryById(blog.category);
+              const category = getCategoryById(blog.category) || {
+                id: 'ai',
+                name: 'AI & ML',
+                icon: '🤖',
+                color: 'from-blue-600 to-purple-600'
+              };
               return (
                 <Link
                   key={blog.id}
@@ -127,9 +166,16 @@ const AllBlogs = () => {
                 >
                   {/* Category Badge */}
                   <div className="p-6 pb-0">
-                    <span className={`inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r ${category.color} text-white text-xs font-semibold rounded-full`}>
-                      {category.icon} {category.name}
-                    </span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r ${category.color} text-white text-xs font-semibold rounded-full`}>
+                        {category.icon} {category.name}
+                      </span>
+                      {blog.source && (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs font-medium rounded-full">
+                          📝 {blog.source}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Content */}

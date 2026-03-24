@@ -7,12 +7,21 @@ const Blogs = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          {/* <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Blog <span className="text-gradient">&</span> Articles
           </h2>
           <div className="w-20 h-1 bg-gradient-to-r from-blue-600 to-purple-600 mx-auto mb-6"></div>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Sharing my knowledge and experiences in software development, AI/ML, and technology
+          </p> */}
+
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            .NET to AI <span className="text-gradient">Transition</span>
+          </h2>
+          <div className="w-20 h-1 bg-gradient-to-r from-green-600 to-teal-600 mx-auto mb-6"></div>
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Documenting my journey from a .NET Developer to an AI Engineer. 
+            Sharing insights on building modern AI-powered systems.
           </p>
         </div>
 
