@@ -1,10 +1,10 @@
 {
-  "buildCommand": "npm install",
+  "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
-  "framework": "other",
+  "framework": "vite",
   "functions": {
-    "server/index.js": {
+    "api/index.js": {
       "memory": 512,
       "maxDuration": 60
     }
@@ -12,7 +12,11 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/server/index.js"
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
