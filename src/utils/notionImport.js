@@ -7,7 +7,10 @@ export default async function importNotionPage(notionUrl, categoryId = null) {
   // download and reupload images to storage, create/save a blog record in the DB, and
   // return a JSON response.
 
-  const res = await fetch('/api/import/notion', {
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5179'
+  const endpoint = `${apiUrl}/api/import/notion`
+
+  const res = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ url: notionUrl, category_id: categoryId })
