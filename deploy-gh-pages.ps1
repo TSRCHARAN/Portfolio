@@ -1,11 +1,8 @@
 # Deploy to GitHub Pages (main site)
-# This deploys to https://YOUR_USERNAME.github.io/
-# Replace with your actual username!
-
-$GITHUB_USERNAME = "YOUR_USERNAME"  # ← CHANGE THIS!
+# Deploys to https://TSRCHARAN.github.io
 
 npm run build
-npx gh-pages -d dist -r "https://github.com/$GITHUB_USERNAME/$GITHUB_USERNAME.github.io.git"
+npx gh-pages -d dist -r "https://github.com/TSRCHARAN/TSRCHARAN.github.io.git"
 
 Write-Host "✅ Deployed to GitHub Pages!"
-Write-Host "Visit: https://$GITHUB_USERNAME.github.io"
+Write-Host "Visit: https://TSRCHARAN.github.io"
