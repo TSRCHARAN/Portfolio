@@ -7,6 +7,17 @@ import { NotionToMarkdown } from 'notion-to-md'
 const app = express()
 app.use(express.json({ limit: '10mb' }))
 
+// CORS headers for Vercel serverless
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200)
+  }
+  next()
+})
+
 const NOTION_TOKEN = process.env.NOTION_TOKEN || ''
 const SUPABASE_URL = process.env.SUPABASE_URL || ''
 const SUPABASE_KEY = process.env.SUPABASE_KEY || ''
@@ -20,6 +31,8 @@ if (!NOTION_TOKEN) {
 }
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.warn('Warning: SUPABASE_URL or SUPABASE_KEY not set.')
+} else {
+  console.log('✅ Supabase configured:', SUPABASE_URL)
 }
 
 const supabase = (SUPABASE_URL && SUPABASE_KEY) ? createClient(SUPABASE_URL, SUPABASE_KEY) : null

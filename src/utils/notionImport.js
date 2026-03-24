@@ -2,8 +2,9 @@
 // NOTE: Notion block -> Markdown conversion must happen on the server (requires Notion API token or OAuth).
 
 export default async function importNotionPage(notionUrl, categoryId = null) {
-  // Use relative path for API calls - works on any domain in production
-  const endpoint = '/api/import/notion'
+  // Use absolute URL if VITE_API_URL is set, otherwise use relative path
+  const baseUrl = import.meta.env.VITE_API_URL || ''
+  const endpoint = baseUrl ? `${baseUrl}/api/import/notion` : '/api/import/notion'
 
   const res = await fetch(endpoint, {
     method: 'POST',
